@@ -63,3 +63,11 @@ ADD FOREIGN KEY (med_history_id) REFERENCES medical_histories (id);
 
 ALTER TABLE treatment_histories
 ADD FOREIGN KEY (treatment_id) REFERENCES treatments (id);
+
+DROP INDEX IF EXISTS th_med_history_id_asc;
+
+CREATE INDEX th_med_history_id_asc ON treatment_histories (med_history_id ASC);
+
+DROP INDEX IF EXISTS th_treatment_id_asc;
+
+CREATE INDEX th_treatment_id_asc ON treatment_histories (treatment_id ASC);
