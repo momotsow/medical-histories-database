@@ -15,8 +15,13 @@ CREATE TABLE
         total_amount DECIMAL(8, 2) NOT NULL,
         gererated_at TIMESTAMP NOT NULL,
         payed_at TIMESTAMP NOT NULL,
-        medical_history_id INT NOT NULL
+        medical_history_id INT NOT NULL,
+        FOREIGN KEY (medical_history_id) REFERENCES medical_histories(id)
     );
+
+DROP INDEX IF EXISTS invoices_medical_history_id_asc;
+
+CREATE INDEX invoices_medical_history_id_asc ON invoices (medical_history_id ASC);
 
 DROP TABLE IF EXISTS medical_histories;
 
@@ -25,20 +30,14 @@ CREATE TABLE
         id SERIAL PRIMARY KEY,
         admitted_at TIMESTAMP NOT NULL,
         patient_id INT NOT NULL,
-        status VARCHAR(100) NOT NULL
+        status VARCHAR(100) NOT NULL,
+        FOREIGN KEY (patient_id) REFERENCES patients(id)
     );
 
-DROP TABLE IF EXISTS invoice_items;
+DROP INDEX IF EXISTS medical_histories_patient_id_asc;
 
-CREATE TABLE
-    invoice_items (
-        id SERIAL PRIMARY KEY,
-        unit_price DECIMAL(8, 2) NOT NULL,
-        quantity INTEGER NOT NULL,
-        total_price DECIMAL(8, 2) NOT NULL,
-        invoice_id INTEGER NOT NULL,
-        treatment_id INTEGER NOT NULL
-    );
+CREATE INDEX medical_histories_patient_id_asc ON medical_histories (patient_id ASC);
+
 
 DROP TABLE IF EXISTS treatments;
 
@@ -51,18 +50,36 @@ CREATE TABLE
 
 DROP TABLE IF EXISTS treatment_histories;
 
+DROP TABLE IF EXISTS invoice_items;
+
+CREATE TABLE
+    invoice_items (
+        id SERIAL PRIMARY KEY,
+        unit_price DECIMAL(8, 2) NOT NULL,
+        quantity INTEGER NOT NULL,
+        total_price DECIMAL(8, 2) NOT NULL,
+        invoice_id INTEGER NOT NULL,
+        treatment_id INTEGER NOT NULL,
+        FOREIGN KEY (invoice_id) REFERENCES invoices(id),
+        FOREIGN KEY (treatment_id) REFERENCES treatments(id)
+    );
+
+DROP INDEX IF EXISTS invoice_items_invoice_id_asc;
+
+CREATE INDEX invoice_items_invoice_id_asc ON invoice_items (invoice_id ASC);
+
+DROP INDEX IF EXISTS invoice_items_treatment_id_asc;
+
+CREATE INDEX invoice_items_treatment_id_asc ON invoice_items (treatment_id ASC);
+
 CREATE TABLE
     treatment_histories (
         med_history_id INTEGER NOT NULL,
         treatment_id INTEGER NOT NULL,
-        CONSTRAINT PK_Treatment_histories PRIMARY KEY (med_history_id, treatment_id)
+        CONSTRAINT PK_Treatment_histories PRIMARY KEY (med_history_id, treatment_id),
+        FOREIGN KEY (med_history_id) REFERENCES medical_histories(id),
+        FOREIGN KEY (treatment_id) REFERENCES treatments(id)
     );
-
-ALTER TABLE treatment_histories
-ADD FOREIGN KEY (med_history_id) REFERENCES medical_histories (id);
-
-ALTER TABLE treatment_histories
-ADD FOREIGN KEY (treatment_id) REFERENCES treatments (id);
 
 DROP INDEX IF EXISTS th_med_history_id_asc;
 
